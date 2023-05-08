@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 @RestControllerAdvice
 public class GlobalControllerAdvice {
+
   @ExceptionHandler(EbffException.class)
   public ApiResponse<?> handleEbffException(EbffException e) {
     return ApiResponse.of(e.getReturnCode());

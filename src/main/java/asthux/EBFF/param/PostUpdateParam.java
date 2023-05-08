@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Builder
 @NoArgsConstructor
-public class PostCreateParam {
+public class PostUpdateParam {
 
   private String title;
 
