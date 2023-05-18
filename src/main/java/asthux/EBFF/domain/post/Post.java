@@ -2,13 +2,13 @@ package asthux.EBFF.domain.post;
 
 import asthux.EBFF.domain.DateTimeEntity;
 import asthux.EBFF.domain.member.Member;
+import asthux.EBFF.param.PostUpdateParam;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.RequiredArgsConstructor;
 
 @Entity
 @Getter
@@ -28,4 +28,9 @@ public class Post extends DateTimeEntity {
   private String title;
 
   private String content;
+
+  public void update(PostUpdateParam param) {
+    this.title = param.getTitle();
+    this.content = param.getContent();
+  }
 }

@@ -8,8 +8,9 @@ import lombok.Getter;
 public enum ReturnCode {
   SUCCESS("0000", "Success"),
 
-  WRONG_PARAMETER("4000", "wrong parameter" ),
-  NOT_FOUND_ENTITY("4001", "Not found entity");
+  WRONG_PARAMETER("4000", "wrong parameter"),
+  NOT_FOUND_ENTITY("4001", "Not found entity"),
+  ALREADY_EXIST("4002", "Already exist");
 
   private String returnCode;
   private String returnMessage;
