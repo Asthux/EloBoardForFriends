@@ -23,18 +23,14 @@ public class CommentService {
   }
 
   public void save(CommentCreateParam param) {
-    Comment comment = Comment.builder()
-                             .post(param.getPost())
-                             .content(param.getContent())
-                             .build();
+    Comment comment = param.toEntity();
     commentRepository.save(comment);
   }
 
   public void remove(Long id) {
     Comment comment = commentRepository.findById(id)
                                        .orElseThrow(() -> new EbffLogicException(ReturnCode.NOT_FOUND_ENTITY));
-
-    commentRepository.delete(comment);
+    comment.delete();
   }
 
   public void update(Long id, CommentUpdateParam param) {

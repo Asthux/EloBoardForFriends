@@ -5,6 +5,7 @@ import asthux.EBFF.domain.member.Member;
 import asthux.EBFF.domain.post.Post;
 import asthux.EBFF.param.CommentUpdateParam;
 import jakarta.persistence.*;
+import java.time.LocalDateTime;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -36,7 +37,13 @@ public class Comment extends DateTimeEntity {
 
   private String content;
 
+  private LocalDateTime deletedAt;
+
   public void update(CommentUpdateParam param) {
     this.content = param.getContent();
+  }
+
+  public void delete() {
+    this.deletedAt = LocalDateTime.now();
   }
 }

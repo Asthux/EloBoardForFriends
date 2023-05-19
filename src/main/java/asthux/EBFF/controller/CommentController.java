@@ -29,7 +29,7 @@ public class CommentController {
 
   @PostMapping("/{id}")
   public ApiResponse<?> create(@PathVariable("id") Long id, @RequestBody CommentCreateRequest request) {
-    Post post = postService.getPostById(id);
+    Post post = postService.getPost(id);
     CommentCreateParam param = request.convert(post);
     commentService.save(param);
     return ApiResponse.of(ReturnCode.SUCCESS);
