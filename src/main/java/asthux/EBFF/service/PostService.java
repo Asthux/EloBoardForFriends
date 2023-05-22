@@ -17,19 +17,16 @@ public class PostService {
 
   private final PostRepository postRepository;
 
-  public Page<Post> getPost(Pageable pageable) {
+  public Page<Post> getPosts(Pageable pageable) {
     return postRepository.findAll(pageable);
   }
 
   public void save(PostCreateParam param) {
-    Post post = Post.builder()
-                    .title(param.getTitle())
-                    .content(param.getContent())
-                    .build();
+    Post post = param.toEntity();
     postRepository.save(post);
   }
 
-  public Post getPostById(Long id) {
+  public Post getPost(Long id) {
     return postRepository.findById(id)
                          .orElseThrow(() -> new EbffLogicException(ReturnCode.NOT_FOUND_ENTITY));
   }

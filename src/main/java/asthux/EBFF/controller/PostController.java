@@ -43,7 +43,7 @@ public class PostController {
     PageLimitSizeValidator.validateSize(request.getPage(), request.getLimit(), 100);
     Pageable pageable = PageRequest.of(request.getPage(), request.getLimit());
 
-    Page<PostItem> posts = postService.getPost(pageable)
+    Page<PostItem> posts = postService.getPosts(pageable)
                                       .map(PostItem::of);
     return ApiResponse.of(EbffPage.of(posts));
 
@@ -60,7 +60,7 @@ public class PostController {
     PageLimitSizeValidator.validateSize(request.getPage(), request.getLimit(), 100);
     Pageable pageable = PageRequest.of(request.getPage(), request.getLimit());
 
-    Post post = postService.getPostById(id);
+    Post post = postService.getPost(id);
     Page<CommentItem> comments = commentService.getComment(post, pageable)
                                                .map(CommentItem::of);
     return ApiResponse.of(EbffPage.of(comments));
@@ -76,7 +76,7 @@ public class PostController {
 
   @GetMapping("/{id}")
   public ApiResponse<?> getPost(@PathVariable("id") Long id) {
-    Post post = postService.getPostById(id);
+    Post post = postService.getPost(id);
     return ApiResponse.of(PostItem.of(post));
   }
 

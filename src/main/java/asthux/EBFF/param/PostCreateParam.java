@@ -1,5 +1,6 @@
 package asthux.EBFF.param;
 
+import asthux.EBFF.domain.post.Post;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -14,4 +15,12 @@ public class PostCreateParam {
   private String title;
 
   private String content;
+
+  public Post toEntity() {
+    Post post = Post.builder()
+                    .title(title)
+                    .content(content)
+                    .build();
+    return post;
+  }
 }
