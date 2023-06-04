@@ -1,6 +1,7 @@
 package asthux.EBFF.domain.member;
 
 import asthux.EBFF.domain.DateTimeEntity;
+import asthux.EBFF.enums.Role;
 import jakarta.persistence.*;
 import lombok.Getter;
 
