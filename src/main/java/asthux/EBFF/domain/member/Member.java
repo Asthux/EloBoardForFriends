@@ -44,8 +44,4 @@ public class Member extends DateTimeEntity {
   public void delete() {
     this.deletedAt = LocalDateTime.now();
   }
-
-  public void addMemberAuthority() {
-    this.role = Role.USER;
-  }
 }

@@ -32,18 +32,18 @@ public class MemberController {
   private final MemberService memberService;
 
   @GetMapping
-  public ApiResponse<?> getMembers(MemberController.MemberGetRequest request) {
+  public ApiResponse<?> getMembers(MemberGetRequest request) {
     PageLimitSizeValidator.validateSize(request.getPage(), request.getLimit(), 100);
     Pageable pageable = PageRequest.of(request.getPage(), request.getLimit());
 
-    Page<MemberController.MemberItem> members = memberService.getMembers(pageable)
-                                                             .map(MemberController.MemberItem::of);
+    Page<MemberItem> members = memberService.getMembers(pageable)
+                                            .map(MemberItem::of);
     return ApiResponse.of(EbffPage.of(members));
   }
 
   @Transactional
   @PostMapping
-  public ApiResponse<?> create(@RequestBody MemberController.MemberCreateRequest request) {
+  public ApiResponse<?> create(@RequestBody MemberCreateRequest request) {
     MemberCreateParam param = request.convert();
     memberService.save(param);
     return ApiResponse.of(ReturnCode.SUCCESS);
@@ -52,7 +52,7 @@ public class MemberController {
   @GetMapping("/{id}")
   public ApiResponse<?> getMember(@PathVariable("id") Long id) {
     Member member = memberService.getMember(id);
-    return ApiResponse.of(MemberController.MemberItem.of(member));
+    return ApiResponse.of(MemberItem.of(member));
   }
 
   @Transactional
@@ -64,7 +64,7 @@ public class MemberController {
 
   @Transactional
   @PatchMapping("/{id}")
-  public ApiResponse<?> update(@PathVariable("id") Long id, @RequestBody MemberController.MemberUpdateRequest request) {
+  public ApiResponse<?> update(@PathVariable("id") Long id, @RequestBody MemberUpdateRequest request) {
     MemberUpdateParam param = request.convert();
     memberService.update(id, param);
     return ApiResponse.of(ReturnCode.SUCCESS);
@@ -88,8 +88,8 @@ public class MemberController {
 
     private String nickName;
 
-    private static MemberController.MemberItem of(Member member) {
-      MemberController.MemberItem converted = new MemberController.MemberItem();
+    private static MemberItem of(Member member) {
+      MemberItem converted = new MemberItem();
       converted.memberName = member.getMemberName();
       converted.password = member.getPassword();
       converted.name = member.getName();

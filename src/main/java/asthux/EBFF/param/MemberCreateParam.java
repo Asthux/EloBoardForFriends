@@ -1,6 +1,7 @@
 package asthux.EBFF.param;
 
 import asthux.EBFF.domain.member.Member;
+import asthux.EBFF.enums.Role;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -20,12 +21,15 @@ public class MemberCreateParam {
 
   private String nickName;
 
+  private Role role;
+
   public Member toEntity() {
     Member member = Member.builder()
                           .memberName(memberName)
                           .password(password)
                           .name(name)
                           .nickName(nickName)
+                          .role(Role.USER)
                           .build();
     return member;
   }

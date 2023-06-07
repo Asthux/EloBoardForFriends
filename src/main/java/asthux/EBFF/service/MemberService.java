@@ -27,7 +27,6 @@ public class MemberService {
 
     Member member = param.toEntity();
 
-    member.addMemberAuthority();
     memberRepository.save(member);
   }
 
