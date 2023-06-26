@@ -1,6 +1,7 @@
 package asthux.EBFF.param;
 
-import asthux.EBFF.domain.game.Race;
+import asthux.EBFF.enums.Race;
+import asthux.EBFF.enums.GameResult;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -16,5 +17,5 @@ public class PlayerInfoUpdateParam {
 
   private Race race;
 
-  private String gameResult;
+  private GameResult gameResult;
 }

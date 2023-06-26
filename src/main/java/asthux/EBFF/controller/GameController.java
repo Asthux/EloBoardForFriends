@@ -2,8 +2,9 @@ package asthux.EBFF.controller;
 
 import asthux.EBFF.domain.game.GameRecord;
 import asthux.EBFF.domain.game.PlayerInfo;
-import asthux.EBFF.domain.game.Race;
+import asthux.EBFF.enums.Race;
 import asthux.EBFF.domain.member.Member;
+import asthux.EBFF.enums.GameResult;
 import asthux.EBFF.enums.ReturnCode;
 import asthux.EBFF.param.GameRecordCreateParam;
 import asthux.EBFF.param.GameRecordUpdateParam;
@@ -14,7 +15,6 @@ import asthux.EBFF.response.EbffPage;
 import asthux.EBFF.service.GameRecordService;
 import asthux.EBFF.service.PlayerInfoService;
 import asthux.EBFF.validator.PageLimitSizeValidator;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.Data;
@@ -35,7 +35,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/api/game_records")
+@RequestMapping("/api/game-records")
 @RequiredArgsConstructor
 @Transactional
 public class GameController {
@@ -49,16 +49,16 @@ public class GameController {
     PageLimitSizeValidator.validateSize(request.getPage(), request.getLimit(), 100);
     Pageable pageable = PageRequest.of(request.getPage(), request.getLimit());
 
-    List<RecordItem> converted = new ArrayList<>();
+    List<RecordItem> itemList = new ArrayList<>();
 
     List<GameRecord> records = gameService.getRecords(playerName);
     for (GameRecord record : records) {
       PlayerInfo gamePlayerInfo = playerInfoService.findPlayerInfo(record, playerName);
       PlayerInfo opponentGamePlayerInfo = playerInfoService.findOpponentPlayerInfo(record, playerName);
-      converted.add(RecordItem.of(record, gamePlayerInfo, opponentGamePlayerInfo));
+      itemList.add(RecordItem.of(record, gamePlayerInfo, opponentGamePlayerInfo));
     }
 
-    Page<RecordItem> recordItems = new PageImpl<>(converted, pageable, converted.size());
+    Page<RecordItem> recordItems = new PageImpl<>(itemList, pageable, itemList.size());
 
     return ApiResponse.of(EbffPage.of(recordItems));
   }
@@ -76,11 +76,10 @@ public class GameController {
     return ApiResponse.of(ReturnCode.SUCCESS);
   }
 
-  @PatchMapping("/{id}")
-  public ApiResponse<?> update(@PathVariable("id") Long id,
-                               @RequestBody GameUpdateRequest request) {
+  @PatchMapping
+  public ApiResponse<?> update(@RequestBody GameUpdateRequest request) {
     GameRecordUpdateParam param = request.convert();
-    gameService.update(id, param);
+    gameService.update(param);
     return ApiResponse.of(ReturnCode.SUCCESS);
   }
 
@@ -104,7 +103,7 @@ public class GameController {
 
     private Race playerRace; //검색한 플레이어 종족
 
-    private String playerGameResult; //검색한 플레이어 승,패 여부
+    private GameResult playerGameResult; //검색한 플레이어 승,패 여부
 
     private String opponentPlayerName; //상대 게임 아이디
 
@@ -135,16 +134,14 @@ public class GameController {
 
     private PlayerInfoCreateRequest loser;
 
+    @Data
     static class PlayerInfoCreateRequest {
 
-      @JsonProperty("playerName")
       private String playerName;
 
-      @JsonProperty("race")
       private Race race;
 
-      @JsonProperty("gameResult")
-      private String gameResult;
+      private GameResult gameResult;
 
       public PlayerInfoCreateParam convert(PlayerInfoCreateRequest player) {
         PlayerInfoCreateParam param = PlayerInfoCreateParam.builder()
@@ -173,6 +170,8 @@ public class GameController {
   @Data
   private static class GameUpdateRequest {
 
+    private Long id;
+
     private Long mapId;
 
     private String ruleSet;
@@ -181,16 +180,14 @@ public class GameController {
 
     private PlayerInfoUpdateRequest loser;
 
+    @Data
     static class PlayerInfoUpdateRequest {
 
-      @JsonProperty("playerName")
       private String playerName;
 
-      @JsonProperty("race")
       private Race race;
 
-      @JsonProperty("gameResult")
-      private String gameResult;
+      private GameResult gameResult;
 
       public PlayerInfoUpdateParam convert(PlayerInfoUpdateRequest player) {
         PlayerInfoUpdateParam param = PlayerInfoUpdateParam.builder()
@@ -207,6 +204,7 @@ public class GameController {
       PlayerInfoUpdateParam loser = this.loser.convert(this.loser);
 
       GameRecordUpdateParam param = GameRecordUpdateParam.builder()
+                                                         .id(id)
                                                          .mapId(mapId)
                                                          .ruleSet(ruleSet)
                                                          .winner(winner)

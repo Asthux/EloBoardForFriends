@@ -1,6 +1,8 @@
 package asthux.EBFF.domain.game;
 
 import asthux.EBFF.domain.DateTimeEntity;
+import asthux.EBFF.enums.GameResult;
+import asthux.EBFF.enums.Race;
 import asthux.EBFF.param.PlayerInfoUpdateParam;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
@@ -31,12 +33,14 @@ public class PlayerInfo extends DateTimeEntity {
   @Enumerated(EnumType.STRING)
   private Race race;
 
-  private String gameResult;
+  @Enumerated(EnumType.STRING)
+  private GameResult gameResult;
 
   private LocalDateTime deletedAt;
 
   public void update(PlayerInfoUpdateParam param) {
     this.playerName = param.getPlayerName();
+    this.race = param.getRace();
     this.gameResult = param.getGameResult();
   }
 

@@ -11,6 +11,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class GameRecordUpdateParam {
 
+  private Long id;
+
   private Long mapId;
 
   private String ruleSet;
