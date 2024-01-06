@@ -10,6 +10,7 @@ import asthux.EBFF.service.MemberService;
 import asthux.EBFF.validator.PageLimitSizeValidator;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
+import org.mindrot.jbcrypt.BCrypt;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -112,7 +113,7 @@ public class MemberController {
     public MemberCreateParam convert() {
       MemberCreateParam param = MemberCreateParam.builder()
                                                  .memberName(memberName)
-                                                 .password(password)
+                                                 .password(BCrypt.hashpw(password, BCrypt.gensalt()))
                                                  .name(name)
                                                  .nickName(nickName)
                                                  .build();
@@ -131,7 +132,7 @@ public class MemberController {
 
     public MemberUpdateParam convert() {
       MemberUpdateParam param = MemberUpdateParam.builder()
-                                                 .password(password)
+                                                 .password(BCrypt.hashpw(password, BCrypt.gensalt()))
                                                  .name(name)
                                                  .nickName(nickName)
                                                  .build();

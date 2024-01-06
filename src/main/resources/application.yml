@@ -12,3 +12,10 @@ spring:
       hibernate:
         show_sql: true
         format_sql: true
+
+  redis:
+    host: 127.0.0.1
+    port: 6379
+
+  jwt:
+    secretKey: 12341152533452342353131
