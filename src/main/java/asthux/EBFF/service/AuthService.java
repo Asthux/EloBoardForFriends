@@ -19,9 +19,9 @@ public class AuthService {
     Member member = memberRepository.findByMemberName(param.getMemberName())
                                     .orElseThrow(() -> new EbffRequestException(ReturnCode.NOT_FOUND_ENTITY));
 
-    boolean passwordsMatch = BCrypt.checkpw(param.getPassword(), member.getPassword());
+    boolean isMatched = BCrypt.checkpw(param.getPassword(), member.getPassword());
 
-    if (passwordsMatch) {
+    if (isMatched) {
       return member;
     } else {
       throw new EbffRequestException(ReturnCode.WRONG_PASSWORD);

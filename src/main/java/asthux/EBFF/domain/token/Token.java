@@ -6,14 +6,11 @@ import lombok.Getter;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.redis.core.RedisHash;
 
-@RedisHash(value = "Token")
+@RedisHash(value = "Token", timeToLive = 60 * 60)
 @Getter
 @Builder
 public class Token implements Serializable {
 
   @Id
-  private Long memberId;
-
   private String jwtToken;
-
 }
