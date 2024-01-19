@@ -3,11 +3,16 @@ package asthux.EBFF.provider;
 import asthux.EBFF.domain.member.Member;
 import asthux.EBFF.domain.token.Token;
 import asthux.EBFF.enums.ReturnCode;
+import asthux.EBFF.exception.EbffLogicException;
 import asthux.EBFF.exception.EbffRequestException;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTVerificationException;
+import com.auth0.jwt.exceptions.TokenExpiredException;
 import com.auth0.jwt.interfaces.DecodedJWT;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.Date;
 import lombok.RequiredArgsConstructor;
@@ -23,43 +28,52 @@ public class JwtProvider {
   @Value("${spring.jwt.secretKey}")
   private String secretKey;
 
-  // 1. 토큰 생성
   public Token createToken(Member member) {
     Algorithm algorithm = Algorithm.HMAC256(secretKey);
 
+    String memberJson = generateMemberClaim(member);
+
     String jwt = JWT.create()
                     .withIssuedAt(new Date())
-                    .withExpiresAt(new Date(System.currentTimeMillis() + 1000000L))
-                    .withClaim("memberId", member.getMemberId())
-                    .withClaim("memberName", member.getMemberName())
-                    .withClaim("nickName", member.getNickName())
-                    .withClaim("role", member.getRole().name())
+                    .withExpiresAt(new Date(System.currentTimeMillis() + 60 * 60 * 1000L))
+                    .withClaim("member", memberJson)
                     .sign(algorithm);
 
     Token token = Token.builder()
                        .jwtToken(jwt)
-                       .memberId(member.getMemberId())
                        .build();
     return token;
   }
 
-  public Long getMemberId(DecodedJWT decodedJWT) {
-    Long memberId = decodedJWT.getClaim("memberId").asLong();
-    return memberId;
-  }
+  public String generateMemberClaim(Member member) {
+    ObjectMapper objectMapper = new ObjectMapper();
+    objectMapper.registerModule(new JavaTimeModule());
 
-  public String getNickName(DecodedJWT decodedJWT) {
-    String nickName = decodedJWT.getClaim("nickName").asString();
-    return nickName;
+    try {
+      return objectMapper.writeValueAsString(member);
+    } catch (JsonProcessingException e) {
+      throw new EbffLogicException(ReturnCode.INTERNAL_ERROR);
+    }
+  }
+  public Member extractMemberClaim(DecodedJWT decodedJWT) {
+    String memberJson = decodedJWT.getClaim("member").asString();
+
+    ObjectMapper objectMapper = new ObjectMapper();
+    try {
+      return objectMapper.readValue(memberJson, Member.class);
+    } catch (JsonProcessingException e) {
+      throw new EbffLogicException(ReturnCode.INTERNAL_ERROR);
+    }
   }
 
   public DecodedJWT verifyToken(String token) {
     Algorithm algorithm = Algorithm.HMAC256(secretKey);
 
     try {
-      DecodedJWT decodedJWT = JWT.require(algorithm)
-                                 .build().verify(token);
-      return decodedJWT;
+      return JWT.require(algorithm)
+                .build().verify(token);
+    } catch (TokenExpiredException tokenExpiredException) {
+      throw new EbffRequestException(ReturnCode.EXPIRED_TOKEN);
     } catch (JWTVerificationException verificationEx) {
       throw new EbffRequestException(ReturnCode.NOT_AUTHORIZED);
     }
