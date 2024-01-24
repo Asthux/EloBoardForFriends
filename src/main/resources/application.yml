@@ -2,8 +2,6 @@ spring:
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://localhost:3306/EBFF?useSSL=false&characterEncoding=UTF-8&serverTimezone=UTC&createDatabaseIfNotExist=true
-    username: root
-    password: 1234
 
   jpa:
     hibernate:
@@ -12,3 +10,10 @@ spring:
       hibernate:
         show_sql: true
         format_sql: true
+
+  redis:
+    host: 127.0.0.1
+    port: 6379
+
+  profiles:
+    include: secret
