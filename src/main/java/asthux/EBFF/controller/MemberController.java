@@ -1,11 +1,13 @@
 package asthux.EBFF.controller;
 
+import asthux.EBFF.argumentresolver.Login;
 import asthux.EBFF.domain.member.Member;
 import asthux.EBFF.enums.ReturnCode;
 import asthux.EBFF.param.MemberCreateParam;
 import asthux.EBFF.param.MemberUpdateParam;
 import asthux.EBFF.response.ApiResponse;
 import asthux.EBFF.response.EbffPage;
+import asthux.EBFF.service.AuthService;
 import asthux.EBFF.service.MemberService;
 import asthux.EBFF.validator.PageLimitSizeValidator;
 import lombok.Data;
@@ -14,7 +16,6 @@ import org.mindrot.jbcrypt.BCrypt;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -27,10 +28,11 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/members")
 @RequiredArgsConstructor
-@Transactional(readOnly = true)
 public class MemberController {
 
   private final MemberService memberService;
+
+  private final AuthService authService;
 
   @GetMapping
   public ApiResponse<?> getMembers(MemberGetRequest request) {
@@ -42,7 +44,6 @@ public class MemberController {
     return ApiResponse.of(EbffPage.of(members));
   }
 
-  @Transactional
   @PostMapping
   public ApiResponse<?> create(@RequestBody MemberCreateRequest request) {
     MemberCreateParam param = request.convert();
@@ -56,18 +57,18 @@ public class MemberController {
     return ApiResponse.of(MemberItem.of(member));
   }
 
-  @Transactional
   @DeleteMapping("/{id}")
-  public ApiResponse<?> delete(@PathVariable("id") Long id) {
-    memberService.remove(id);
+  public ApiResponse<?> delete(@Login Member loginMember, @PathVariable("id") Long id) {
+    memberService.remove(loginMember.getMemberId(), id);
+    authService.verifyLogout();
     return ApiResponse.of(ReturnCode.SUCCESS);
   }
 
-  @Transactional
   @PatchMapping("/{id}")
-  public ApiResponse<?> update(@PathVariable("id") Long id, @RequestBody MemberUpdateRequest request) {
+  public ApiResponse<?> update(@Login Member loginMember, @PathVariable("id") Long id,
+                               @RequestBody MemberUpdateRequest request) {
     MemberUpdateParam param = request.convert();
-    memberService.update(id, param);
+    memberService.update(loginMember.getMemberId(), id, param);
     return ApiResponse.of(ReturnCode.SUCCESS);
   }
 

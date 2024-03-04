@@ -1,5 +1,6 @@
 package asthux.EBFF.controller;
 
+import asthux.EBFF.argumentresolver.Login;
 import asthux.EBFF.domain.game.GameRecord;
 import asthux.EBFF.domain.game.PlayerInfo;
 import asthux.EBFF.enums.Race;
@@ -23,7 +24,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -37,7 +37,6 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/game-records")
 @RequiredArgsConstructor
-@Transactional
 public class GameController {
 
   private final GameRecordService gameService;
@@ -64,22 +63,22 @@ public class GameController {
   }
 
   @PostMapping
-  public ApiResponse<?> create(@RequestBody GameCreateRequest request) {
-    GameRecordCreateParam param = request.convert();
+  public ApiResponse<?> create(@Login Member loginMember, @RequestBody GameCreateRequest request) {
+    GameRecordCreateParam param = request.convert(loginMember);
     gameService.save(param);
     return ApiResponse.of(ReturnCode.SUCCESS);
   }
 
   @DeleteMapping("/{id}")
-  public ApiResponse<?> delete(@PathVariable("id") Long id) {
-    gameService.remove(id);
+  public ApiResponse<?> delete(@Login Member loginMember, @PathVariable("id") Long id) {
+    gameService.remove(loginMember.getMemberId(), id);
     return ApiResponse.of(ReturnCode.SUCCESS);
   }
 
   @PatchMapping
-  public ApiResponse<?> update(@RequestBody GameUpdateRequest request) {
+  public ApiResponse<?> update(@Login Member loginMember, @RequestBody GameUpdateRequest request) {
     GameRecordUpdateParam param = request.convert();
-    gameService.update(param);
+    gameService.update(loginMember.getMemberId(), param);
     return ApiResponse.of(ReturnCode.SUCCESS);
   }
 
@@ -153,11 +152,12 @@ public class GameController {
       }
     }
 
-    public GameRecordCreateParam convert() {
+    public GameRecordCreateParam convert(Member loginMember) {
       PlayerInfoCreateParam winner = this.winner.convert(this.winner);
       PlayerInfoCreateParam loser = this.loser.convert(this.loser);
 
       GameRecordCreateParam param = GameRecordCreateParam.builder()
+                                                         .member(loginMember)
                                                          .mapId(mapId)
                                                          .ruleSet(ruleSet)
                                                          .winner(winner)

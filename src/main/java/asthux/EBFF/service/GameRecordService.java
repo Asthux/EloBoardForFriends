@@ -15,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class GameRecordService {
 
   private final MapRepository mapRepository;
@@ -23,11 +24,13 @@ public class GameRecordService {
 
   private final PlayerInfoService playerInfoService;
 
+  private final AuthService authService;
+
+  @Transactional(readOnly = true)
   public List<GameRecord> getRecords(String playerName) {
     return gameRecordRepository.findGameRecordByPlayerName(playerName);
   }
 
-  @Transactional
   public void save(GameRecordCreateParam param) {
     Map map = mapRepository.findById(param.getMapId())
                            .orElseThrow(() -> new EbffLogicException(ReturnCode.NOT_FOUND_ENTITY));
@@ -40,21 +43,21 @@ public class GameRecordService {
     gameRecordRepository.save(gameRecord);
   }
 
-  @Transactional
-  public void remove(Long id) {
+  public void remove(Long loginMemberId, Long id) {
     GameRecord gameRecord = gameRecordRepository.findById(id)
                                                 .orElseThrow(() -> new EbffLogicException(ReturnCode.NOT_FOUND_ENTITY));
 
+    authService.isAuthorityMatched(gameRecord.getMember().getMemberId(), loginMemberId);
     playerInfoService.delete(gameRecord);
 
     gameRecord.delete();
   }
 
-  @Transactional
-  public void update(GameRecordUpdateParam param) {
+  public void update(Long loginMemberId, GameRecordUpdateParam param) {
     GameRecord gameRecord = gameRecordRepository.findById(param.getId())
                                                 .orElseThrow(() -> new EbffLogicException(ReturnCode.NOT_FOUND_ENTITY));
 
+    authService.isAuthorityMatched(gameRecord.getMember().getMemberId(), loginMemberId);
 
     Map map = mapRepository.findById(param.getMapId())
                            .orElseThrow(() -> new EbffLogicException(ReturnCode.NOT_FOUND_ENTITY));

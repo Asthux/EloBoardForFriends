@@ -28,6 +28,8 @@ public class JwtProvider {
   @Value("${spring.jwt.secretKey}")
   private String secretKey;
 
+  private static final ObjectMapper objectmapper = new ObjectMapper().registerModule(new JavaTimeModule());
+
   public Token createToken(Member member) {
     Algorithm algorithm = Algorithm.HMAC256(secretKey);
 
@@ -45,22 +47,19 @@ public class JwtProvider {
     return token;
   }
 
-  public String generateMemberClaim(Member member) {
-    ObjectMapper objectMapper = new ObjectMapper();
-    objectMapper.registerModule(new JavaTimeModule());
-
+  private String generateMemberClaim(Member member) {
     try {
-      return objectMapper.writeValueAsString(member);
+      return objectmapper.writeValueAsString(member);
     } catch (JsonProcessingException e) {
       throw new EbffLogicException(ReturnCode.INTERNAL_ERROR);
     }
   }
-  public Member extractMemberClaim(DecodedJWT decodedJWT) {
+
+  private Member extractMemberClaim(DecodedJWT decodedJWT) {
     String memberJson = decodedJWT.getClaim("member").asString();
 
-    ObjectMapper objectMapper = new ObjectMapper();
     try {
-      return objectMapper.readValue(memberJson, Member.class);
+      return objectmapper.readValue(memberJson, Member.class);
     } catch (JsonProcessingException e) {
       throw new EbffLogicException(ReturnCode.INTERNAL_ERROR);
     }
@@ -85,6 +84,16 @@ public class JwtProvider {
       throw new EbffRequestException(ReturnCode.NOT_AUTHORIZED);
     } else {
       return request.getHeader("X-ACCESS-TOKEN");
+    }
+  }
+
+  public Member getMember() {
+    HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes()).getRequest();
+    if (request.getHeader("X-ACCESS-TOKEN") == null) {
+      throw new EbffRequestException(ReturnCode.NOT_AUTHORIZED);
+    } else {
+      DecodedJWT decodedJWT = verifyToken(request.getHeader("X-ACCESS-TOKEN"));
+      return extractMemberClaim(decodedJWT);
     }
   }
 }

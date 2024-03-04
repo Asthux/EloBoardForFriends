@@ -1,16 +1,12 @@
 package asthux.EBFF.controller;
 
-import asthux.EBFF.domain.member.Member;
 import asthux.EBFF.domain.token.Token;
 import asthux.EBFF.enums.ReturnCode;
 import asthux.EBFF.param.MemberLoginParam;
-import asthux.EBFF.provider.JwtProvider;
-import asthux.EBFF.repository.RedisTokenRepository;
 import asthux.EBFF.response.ApiResponse;
 import asthux.EBFF.service.AuthService;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -24,28 +20,16 @@ public class AuthController {
 
   private final AuthService authService;
 
-  @Autowired
-  private final JwtProvider jwtProvider;
-
-  private final RedisTokenRepository tokenRepository;
-
   @PostMapping("/login")
   public ApiResponse<?> login(@RequestBody MemberLoginRequest request) {
     MemberLoginParam param = request.convert();
-    Member member = authService.verifyLogin(param);
-    Token token = jwtProvider.createToken(member);
-    tokenRepository.save(token);
+    Token token = authService.verifyLogin(param);
     return ApiResponse.of(TokenItem.of(token));
   }
 
   @DeleteMapping("/logout")
   public ApiResponse<?> logout() {
-    String stringToken = jwtProvider.getToken();
-    jwtProvider.verifyToken(stringToken);
-    Token token = Token.builder()
-                       .jwtToken(stringToken)
-                       .build();
-    tokenRepository.delete(token);
+    authService.verifyLogout();
     return ApiResponse.of(ReturnCode.SUCCESS);
   }
 
