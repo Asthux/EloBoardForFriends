@@ -11,13 +11,18 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class CommentService {
 
   private final CommentRepository commentRepository;
 
+  private final AuthService authService;
+
+  @Transactional(readOnly = true)
   public Page<Comment> getComment(Post post, Pageable pageable) {
     return commentRepository.findByPost(post, pageable);
   }
@@ -27,15 +32,17 @@ public class CommentService {
     commentRepository.save(comment);
   }
 
-  public void remove(Long id) {
+  public void remove(Long loginMemberId, Long id) {
     Comment comment = commentRepository.findById(id)
                                        .orElseThrow(() -> new EbffLogicException(ReturnCode.NOT_FOUND_ENTITY));
+    authService.isAuthorityMatched(comment.getCommentId(), loginMemberId);
     comment.delete();
   }
 
-  public void update(Long id, CommentUpdateParam param) {
+  public void update(Long loginMemberId, Long id, CommentUpdateParam param) {
     Comment comment = commentRepository.findById(id)
                                        .orElseThrow(() -> new EbffLogicException(ReturnCode.NOT_FOUND_ENTITY));
+    authService.isAuthorityMatched(comment.getCommentId(), loginMemberId);
     comment.update(param);
   }
 }

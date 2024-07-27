@@ -13,26 +13,27 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class PlayerInfoService {
 
   private final PlayerInfoRepository playerInfoRepository;
 
+  @Transactional(readOnly = true)
   public PlayerInfo findPlayerInfo(GameRecord record, String playerName) {
     return playerInfoRepository.findByGameRecordAndPlayerName(record, playerName);
   }
 
+  @Transactional(readOnly = true)
   public PlayerInfo findOpponentPlayerInfo(GameRecord record, String playerName) {
     return playerInfoRepository.findByGameRecordAndPlayerNameNot(record, playerName);
   }
 
-  @Transactional
   public void save(GameRecord gameRecord, PlayerInfoCreateParam param) {
     PlayerInfo player = param.toEntity(gameRecord);
 
     playerInfoRepository.save(player);
   }
 
-  @Transactional
   public void update(GameRecord gameRecord, PlayerInfoUpdateParam param) {
     List<PlayerInfo> players = playerInfoRepository.findByGameRecord(gameRecord);
 
@@ -64,7 +65,6 @@ public class PlayerInfoService {
     playerInfo.update(param);
   }
 
-  @Transactional
   public void delete(GameRecord gameRecord) {
     List<PlayerInfo> players = playerInfoRepository.findByGameRecord(gameRecord);
 
